@@ -20,6 +20,7 @@ import { topicReferenceExecutor } from '@lobechat/builtin-tool-topic-reference/e
 import type { BuiltinToolContext, BuiltinToolResult, IBuiltinToolExecutor } from '../types';
 import { activatorExecutor } from './lobe-activator';
 import { agentDocumentsExecutor } from './lobe-agent-documents';
+import { messageExecutor } from './lobe-message';
 import { notebookExecutor } from './lobe-notebook';
 import { pageAgentExecutor } from './lobe-page-agent';
 import { skillStoreExecutor } from './lobe-skill-store';
@@ -140,6 +141,7 @@ registerExecutors([
   knowledgeBaseExecutor,
   localSystemExecutor,
   memoryExecutor,
+  messageExecutor,
   notebookExecutor,
   pageAgentExecutor,
   skillStoreExecutor,
