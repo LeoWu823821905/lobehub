@@ -49,6 +49,8 @@
   "channel.endpointUrl": "Webhook URL",
   "channel.endpointUrlHint": "请复制此 URL 并粘贴到 {{name}} 开发者门户的 <bold>{{fieldName}}</bold> 字段中。",
   "channel.feishu.description": "将助手连接到飞书，支持私聊和群聊。",
+  "channel.historyLimit": "历史消息条数",
+  "channel.historyLimitHint": "读取频道历史消息时默认获取的消息数量",
   "channel.lark.description": "将助手连接到 Lark，支持私聊和群聊。",
   "channel.openPlatform": "开放平台",
   "channel.platforms": "平台",
