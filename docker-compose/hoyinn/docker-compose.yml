@@ -83,7 +83,7 @@ services:
   # version lock ref: https://github.com/lobehub/lobe-chat/pull/7331
   casdoor:
     image: casbin/casdoor:v2.13.0
-    container_name: hoyinn-casdoor
+    container_name: lobe-casdoor
     entrypoint: /bin/sh -c './server --createDatabase=true'
     network_mode: 'service:network-service'
     depends_on:
@@ -93,10 +93,10 @@ services:
       httpport: ${CASDOOR_PORT}
       RUNNING_IN_DOCKER: 'true'
       driverName: 'postgres'
-      dataSourceName: 'user=postgres password=${POSTGRES_PASSWORD} host=postgresql port=5432 sslmode=disable dbname=${LOBE_DB_NAME}'
+      dataSourceName: 'user=postgres password=${POSTGRES_PASSWORD} host=postgresql port=5432 sslmode=disable dbname=casdoor'
       runmode: 'dev'
     volumes:
-      - ./conf/init_data.json:/init_data.json
+      - './conf/init_data.json:/init_data.json'
     env_file:
       - .env
 
@@ -191,10 +191,12 @@ services:
 
     environment:
       - 'AUTH_SSO_PROVIDERS=casdoor'
-      - 'AUTH_CASDOOR_ID=lobechat'
-      - 'AUTH_CASDOOR_SECRET=lobechat-secret'
+      - 'AUTH_CASDOOR_ID=a387a4892ee19b1a2249'
+      - 'AUTH_CASDOOR_SECRET=dbf205949d704de81b0b5b3603174e23fbecc354'
       - 'AUTH_CASDOOR_ISSUER=http://localhost:8080'
-      - 'AUTH_CASDOOR_SCOPE=openid profile email'
+      # - 'AUTH_CASDOOR_SCOPE=openid profile email'
+      # - 'KEY_VAULTS_SECRET=Kix2wcUONd4CX51E/ZPAd36BqM4wzJgKjPtz2sGztqQ='
+      # - 'AUTH_SECRET=NX2kaPE923dt6BL2U8e9oSre5RfoT7hg'
       - 'DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgresql:5432/${LOBE_DB_NAME}'
       - 'INTERNAL_APP_URL=http://localhost:3210'
       - 'S3_ENDPOINT=${S3_ENDPOINT}'
