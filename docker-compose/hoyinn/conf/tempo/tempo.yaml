@@ -1,0 +1,27 @@
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 0
+
+query_frontend:
+  search:
+    duration_slo: 5s
+    throughput_bytes_slo: 1.073741824e+09
+
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+      cluster: docker-compose
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/tempo
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors:
+        - service_graphs
+        - span_metrics

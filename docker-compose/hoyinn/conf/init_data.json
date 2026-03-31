@@ -1,0 +1,42 @@
+{
+  "org": {
+    "name": "LobeHub",
+    "displayName": "LobeHub",
+    "websiteUrl": "https://lobehub.com",
+    "description": "LobeHub is an open-source AI chat platform",
+    "email": "contact@lobehub.com",
+    "phone": "",
+    "location": "",
+    "avatar": "",
+    "createdTime": "2024-01-01T00:00:00Z",
+    "updatedTime": "2024-01-01T00:00:00Z",
+    "isDeleted": false
+  },
+  "application": {
+    "name": "LobeChat",
+    "displayName": "LobeChat",
+    "description": "LobeChat application",
+    "orgId": "0",
+    "clientId": "lobechat",
+    "clientSecret": "lobechat-secret",
+    "redirectUris": ["http://localhost:3210/api/auth/callback/casdoor"],
+    "logo": "",
+    "homepageUrl": "http://localhost:3210",
+    "createdTime": "2024-01-01T00:00:00Z",
+    "updatedTime": "2024-01-01T00:00:00Z",
+    "isDeleted": false
+  },
+  "user": {
+    "name": "admin",
+    "displayName": "Admin",
+    "password": "123456",
+    "email": "admin@lobehub.com",
+    "phone": "",
+    "location": "",
+    "avatar": "",
+    "orgId": "0",
+    "createdTime": "2024-01-01T00:00:00Z",
+    "updatedTime": "2024-01-01T00:00:00Z",
+    "isDeleted": false
+  }
+}

@@ -1,0 +1,40 @@
+# See https://docs.searxng.org/admin/settings/index.html#settings
+# for a complete list of settings
+
+use_default_settings: true
+
+server:
+  port: 8080
+  base_url: http://localhost:8080
+  secret_key: "Hoyinn123456"
+
+search:
+  safe_search: 0
+  default_lang: "en"
+  language: "en-US,en"
+
+ui:
+  default_theme: oscar
+  themes: [oscar, simple, null]
+
+engines:
+  - name: google
+    engine: google
+    shortcut: go
+    disabled: false
+  - name: bing
+    engine: bing
+    shortcut: bi
+    disabled: false
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+    disabled: false
+  - name: startpage
+    engine: startpage
+    shortcut: sp
+    disabled: false
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: wiki
+    disabled: false
