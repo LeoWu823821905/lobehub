@@ -1,5 +1,4 @@
 name: hoyinn
-
 services:
   network-service:
     image: alpine
@@ -35,7 +34,6 @@ services:
     restart: always
     networks:
       - hoyinn-network
-
 
   redis:
     image: redis:7-alpine
@@ -188,7 +186,6 @@ services:
         condition: service_started
       casdoor:
         condition: service_started
-
     environment:
       - 'AUTH_SSO_PROVIDERS=casdoor'
       - 'AUTH_CASDOOR_ID=a387a4892ee19b1a2249'
@@ -216,8 +213,6 @@ services:
       - 'OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf'
       - 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces'
       - 'QSTASH_TOKEN='
-
-
     env_file:
       - .env
     restart: always
