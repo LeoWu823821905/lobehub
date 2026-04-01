@@ -188,9 +188,9 @@ services:
         condition: service_started
     environment:
       - 'AUTH_SSO_PROVIDERS=casdoor'
-      - 'AUTH_CASDOOR_ID=a387a4892ee19b1a2249'
-      - 'AUTH_CASDOOR_SECRET=dbf205949d704de81b0b5b3603174e23fbecc354'
-      - 'AUTH_CASDOOR_ISSUER=http://localhost:8080'
+      - 'AUTH_CASDOOR_ID=${AUTH_CASDOOR_CLIENT_ID}'
+      - 'AUTH_CASDOOR_SECRET=${AUTH_CASDOOR_CLIENT_SECRET}'
+      - 'AUTH_CASDOOR_ISSUER=${AUTH_CASDOOR_ISSUER}'
       # - 'AUTH_CASDOOR_SCOPE=openid profile email'
       # - 'KEY_VAULTS_SECRET=Kix2wcUONd4CX51E/ZPAd36BqM4wzJgKjPtz2sGztqQ='
       # - 'AUTH_SECRET=NX2kaPE923dt6BL2U8e9oSre5RfoT7hg'

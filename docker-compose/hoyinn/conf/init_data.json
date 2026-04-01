@@ -344,6 +344,8 @@
       "redirectUris": [
         "http://localhost:3210/api/auth/callback/casdoor",
         "https://localhost:3210/api/auth/callback/casdoor",
+        "http://10.0.150.34:3210/api/auth/callback/casdoor",
+        "https://10.0.150.34:3210/api/auth/callback/casdoor",
         "http://example.com/api/auth/callback/casdoor",
         "https://example.com/api/auth/callback/casdoor"
       ],
