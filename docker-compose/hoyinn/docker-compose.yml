@@ -1,5 +1,4 @@
 name: hoyinn
-name: hoyinn
 services:
   network-service:
     image: alpine
