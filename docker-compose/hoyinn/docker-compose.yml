@@ -5,13 +5,20 @@ services:
     container_name: hoyinn-network
     restart: always
     ports:
-      - '${MINIO_PORT}:${MINIO_PORT}' # MinIO API
+      - '${MINIO_PORT}:9000' # MinIO API
       - '${MINIO_CONSOLE_PORT}:9001' # MinIO Console
-      - '${CASDOOR_PORT}:${CASDOOR_PORT}' # Casdoor
+      - '${CASDOOR_PORT}:8080' # Casdoor
       - '${LOBE_PORT}:3210' # LobeChat
       - '${GRAFANA_PORT}:3000' # Grafana
-      - '${OTEL_HTTP_PORT}:4318' # otel-collector HTTP
-      - '${OTEL_GRPC_PORT}:4317' # otel-collector gRPC
+      # - '${OTEL_HTTP_PORT}:4318' # otel-collector HTTP
+      # - '${OTEL_GRPC_PORT}:4317' # otel-collector gRPC
+      # - '${POSTGRES_PORT}:5432' # PostgreSQL
+      # - '${REDIS_PORT}:6379' # Redis
+    expose:
+      - '5432' # PostgreSQL
+      - '6379' # Redis
+      - '4318' # otel-collector HTTP
+      - '4317' # otel-collector gRPC
     command: tail -f /dev/null
     networks:
       - hoyinn-network
@@ -19,8 +26,9 @@ services:
   postgresql:
     image: paradedb/paradedb:latest
     container_name: hoyinn-postgres
-    ports:
-      - '${POSTGRES_PORT}:5432'
+    network_mode: 'service:network-service'
+    # ports:
+    #   - '${POSTGRES_PORT}:5432'
     volumes:
       - './data/postgresql:/var/lib/postgresql'
     environment:
@@ -32,14 +40,13 @@ services:
       timeout: 5s
       retries: 5
     restart: always
-    networks:
-      - hoyinn-network
 
   redis:
     image: redis:7-alpine
     container_name: hoyinn-redis
-    ports:
-      - '${REDIS_PORT}:6379'
+    network_mode: 'service:network-service'
+    # ports:
+    #   - '${REDIS_PORT}:6379'
     command: redis-server --save 60 1000 --appendonly yes
     volumes:
       - './data/redis:/data'
@@ -49,8 +56,6 @@ services:
       timeout: 3s
       retries: 5
     restart: always
-    networks:
-      - hoyinn-network
 
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
@@ -67,12 +72,12 @@ services:
       /bin/sh -c "
         minio server /etc/minio/data --address ':${MINIO_PORT}' --console-address ':9001' &
         MINIO_PID=$!
-        while ! curl -s http://localhost:${MINIO_PORT}/minio/health/live; do
+        while ! curl -s http://127.0.0.1:9000/minio/health/live; do
           echo 'Waiting for MinIO to start...'
           sleep 1
         done
         sleep 5
-        mc alias set myminio http://localhost:${MINIO_PORT} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
+        mc alias set myminio http://127.0.0.1:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
         echo 'Creating bucket ${MINIO_LOBE_BUCKET}'
         mc mb myminio/${MINIO_LOBE_BUCKET}
         wait $MINIO_PID
@@ -81,20 +86,20 @@ services:
   # version lock ref: https://github.com/lobehub/lobe-chat/pull/7331
   casdoor:
     image: casbin/casdoor:v2.13.0
-    container_name: lobe-casdoor
+    container_name: hoyinn-casdoor
     entrypoint: /bin/sh -c './server --createDatabase=true'
     network_mode: 'service:network-service'
     depends_on:
       postgresql:
         condition: service_healthy
     environment:
-      httpport: ${CASDOOR_PORT}
+      httpport: 8080
       RUNNING_IN_DOCKER: 'true'
       driverName: 'postgres'
-      dataSourceName: 'user=postgres password=${POSTGRES_PASSWORD} host=postgresql port=5432 sslmode=disable dbname=casdoor'
+      dataSourceName: 'user=postgres password=${POSTGRES_PASSWORD} host=127.0.0.1 port=5432 sslmode=disable dbname=casdoor'
       runmode: 'dev'
     volumes:
-      - './conf/init_data.json:/init_data.json'
+      - './conf/casdoor/init_data.json:/init_data.json'
     env_file:
       - .env
 
@@ -102,7 +107,7 @@ services:
     image: searxng/searxng
     container_name: hoyinn-searxng
     volumes:
-      - './conf/searxng-settings.yml:/etc/searxng/settings.yml'
+      - './conf/searxng/searxng-settings.yml:/etc/searxng/settings.yml'
     environment:
       - 'SEARXNG_SETTINGS_FILE=/etc/searxng/settings.yml'
     restart: always
@@ -184,19 +189,17 @@ services:
         condition: service_started
       minio:
         condition: service_started
-      casdoor:
-        condition: service_started
     environment:
       - 'AUTH_SSO_PROVIDERS=casdoor'
       - 'AUTH_CASDOOR_ID=${AUTH_CASDOOR_CLIENT_ID}'
       - 'AUTH_CASDOOR_SECRET=${AUTH_CASDOOR_CLIENT_SECRET}'
       - 'AUTH_CASDOOR_ISSUER=${AUTH_CASDOOR_ISSUER}'
-      # - 'AUTH_CASDOOR_SCOPE=openid profile email'
-      # - 'KEY_VAULTS_SECRET=Kix2wcUONd4CX51E/ZPAd36BqM4wzJgKjPtz2sGztqQ='
-      # - 'AUTH_SECRET=NX2kaPE923dt6BL2U8e9oSre5RfoT7hg'
-      - 'DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgresql:5432/${LOBE_DB_NAME}'
-      - 'INTERNAL_APP_URL=http://localhost:3210'
-      - 'S3_ENDPOINT=${S3_ENDPOINT}'
+      - 'AUTH_CASDOOR_SCOPE=${AUTH_CASDOOR_SCOPE}'
+      - 'KEY_VAULTS_SECRET=${KEY_VAULTS_SECRET}'
+      - 'AUTH_SECRET=${AUTH_SECRET}'
+      - 'DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@127.0.0.1:5432/${LOBE_DB_NAME}'
+      - 'INTERNAL_APP_URL=http://127.0.0.1:3210'
+      - 'S3_ENDPOINT=http://${SERVER_HOST}:${MINIO_PORT}'
       - 'S3_BUCKET=${MINIO_LOBE_BUCKET}'
       - 'S3_ENABLE_PATH_STYLE=1'
       - 'S3_ACCESS_KEY=${MINIO_ROOT_USER}'
@@ -205,14 +208,15 @@ services:
       - 'LLM_VISION_IMAGE_USE_BASE64=1'
       - 'S3_SET_ACL=0'
       - 'SEARXNG_URL=http://searxng:8080'
-      - 'REDIS_URL=redis://redis:6379'
+      - 'REDIS_URL=redis://127.0.0.1:6379'
       - 'REDIS_PREFIX=hoyinn'
       - 'REDIS_TLS=0'
       - 'OTEL_EXPORTER_OTLP_METRICS_PROTOCOL=http/protobuf'
-      - 'OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://localhost:4318/v1/metrics'
+      - 'OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://127.0.0.1:4318/v1/metrics'
       - 'OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf'
-      - 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces'
-      - 'QSTASH_TOKEN='
+      - 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://127.0.0.1:4318/v1/traces'
+      - 'QSTASH_TOKEN=${QSTASH_TOKEN}'
+      - 'SSRF_ALLOW_PRIVATE_IP_ADDRESS=${SSRF_ALLOW_PRIVATE_IP_ADDRESS}'
     env_file:
       - .env
     restart: always
