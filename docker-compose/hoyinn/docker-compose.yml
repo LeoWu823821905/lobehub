@@ -112,7 +112,7 @@ services:
       - './conf/searxng/searxng-settings.yml:/etc/searxng/settings.yml'
     environment:
       - 'SEARXNG_SETTINGS_FILE=/etc/searxng/settings.yml'
-      - 'SEARXNG_ENGINES=baidu,bing'
+      - 'SEARXNG_BOTDETECTION_ENABLED=false'
     restart: always
     networks:
       - hoyinn-network
