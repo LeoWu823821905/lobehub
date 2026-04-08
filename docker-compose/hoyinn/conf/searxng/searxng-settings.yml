@@ -504,8 +504,6 @@ engines:
     shortcut: bi
     disabled: false
     max_redirects: 1
-    language: zh-CN
-    region: cn
 
   - name: bing images
     engine: bing_images
