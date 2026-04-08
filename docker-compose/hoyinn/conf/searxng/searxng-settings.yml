@@ -36,7 +36,7 @@ search:
 
 server:
   port: 8888
-  bind_address: '127.0.0.1'
+  bind_address: '0.0.0.0'
   base_url: /
   limiter: false
   public_instance: false
@@ -494,6 +494,7 @@ engines:
     tests: *tests_infobox
     categories: [general]
     disabled: true
+    hidden: true
 
   - name: duckduckgo
     engine: duckduckgo
