@@ -195,6 +195,7 @@ engines:
     engine: annas_archive
     disabled: true
     shortcut: aa
+    base_url: "https://annas-archive.org"
 
   - name: apk mirror
     engine: apkmirror
@@ -212,6 +213,7 @@ engines:
     categories: onions
     enable_http: true
     shortcut: ah
+    disabled: true
 
   - name: anaconda
     engine: xpath
@@ -341,11 +343,11 @@ engines:
     timeout: 30
     disabled: true
 
-  - name: cppreference
-    engine: cppreference
-    shortcut: cpp
-    paging: false
-    disabled: true
+  # - name: cppreference
+  #   engine: cppreference
+  #   shortcut: cpp
+  #   paging: false
+  #   disabled: true
 
   - name: crossref
     engine: crossref
@@ -489,6 +491,7 @@ engines:
     display_type: ['infobox']
     tests: *tests_infobox
     categories: [general]
+    disabled: true
 
   - name: duckduckgo
     engine: duckduckgo
