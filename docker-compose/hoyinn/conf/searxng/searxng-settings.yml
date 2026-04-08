@@ -1,6 +1,6 @@
 general:
   debug: false
-  instance_name: 'SearXNG 中文定制版'
+  instance_name: 'searxng'
   privacypolicy_url: false
   donation_url: false
   contact_url: false
@@ -16,10 +16,10 @@ brand:
 
 search:
   safe_search: 0
-  autocomplete: 'baidu'  # 仅保留官方支持的百度自动补全
-  autocomplete_min: 2
-  favicon_resolver: 'duckduckgo'
-  default_lang: 'zh-CN'
+  autocomplete: ''
+  autocomplete_min: 4
+  favicon_resolver: ''
+  default_lang: 'auto'
   ban_time_on_fail: 5
   max_ban_time_on_fail: 120
   suspended_times:
@@ -35,21 +35,19 @@ search:
 
 server:
   port: 8888
-  bind_address: '0.0.0.0'
+  bind_address: '127.0.0.1'
   base_url: /
   limiter: false
   public_instance: false
-  secret_key: '779c5b69fe650f147be9012abca6b44a8697acdb2817b46353f4779bb07d81d1'  # 可保留你的密钥
+  secret_key: '779c5b69fe650f147be9012abca6b44a8697acdb2817b46353f4779bb07d81d1'
   image_proxy: false
-  http_protocol_version: '1.1'
+  http_protocol_version: '1.0'
   method: 'POST'
   default_http_headers:
     X-Content-Type-Options: nosniff
     X-Download-Options: noopen
     X-Robots-Tag: noindex, nofollow
     Referrer-Policy: no-referrer
-    X-Forwarded-For: 127.0.0.1  # 解决X-Forwarded-For缺失
-    X-Real-IP: 127.0.0.1        # 解决X-Real-IP缺失
 
 redis:
   url: false
@@ -59,29 +57,25 @@ ui:
   static_use_hash: false
   templates_path: ''
   query_in_title: false
-  infinite_scroll: true
+  infinite_scroll: false
   default_theme: simple
-  center_alignment: true
-  default_locale: 'zh_CN'
+  center_alignment: false
+  default_locale: ''  # 核心修正：空值自动检测浏览器语言，适配国际化
   theme_args:
     simple_style: auto
   search_on_category_select: true
   hotkeys: default
   url_formatting: pretty
 
+preferences:
+  lock: []
+
 outgoing:
-  request_timeout: 10.0  # 延长超时适配国内网络
-  max_request_timeout: 15.0
+  request_timeout: 3.0
   useragent_suffix: ''
   pool_connections: 100
   pool_maxsize: 20
-  enable_http2: false  # 禁用HTTP2解决兼容性问题
-  # 如需代理访问GitHub等，取消以下注释并配置
-  # proxies:
-  #   all://:
-  #     - http://127.0.0.1:7890
-  using_tor_proxy: false
-  extra_proxy_timeout: 5
+  enable_http2: true
 
 enabled_plugins:
   - 'Basic Calculator'
@@ -89,137 +83,819 @@ enabled_plugins:
   - 'Self Information'
   - 'Tracker URL remover'
   - 'Unit converter plugin'
+  - 'Ahmia blacklist'
 
 hostnames:
-  replace:
-    '(.*\.)?youtube\.com$': 'bilibili.com'
-    '(.*\.)?youtu\.be$': 'bilibili.com'
-    '(.*\.)?twitter\.com$': 'weibo.com'
-    '(.*\.)?reddit\.com$': 'tieba.baidu.com'
+  replace: {}
+  remove: []
+  low_priority: []
+  high_priority: []
 
 checker:
   off_when_debug: true
-  scheduling: false  # 禁用检查器减少网络请求
+  additional_tests:
+    rosebud: &test_rosebud
+      matrix:
+        query: rosebud
+        lang: en
+      result_container:
+        - not_empty
+        - ['one_title_contains', 'citizen kane']
+      test:
+        - unique_results
+    android: &test_android
+      matrix:
+        query: ['android']
+        lang: ['en', 'de', 'fr', 'zh-CN']
+      result_container:
+        - not_empty
+        - ['one_title_contains', 'google']
+      test:
+        - unique_results
+  tests:
+    infobox: &tests_infobox
+      infobox:
+        matrix:
+          query: ['linux', 'new york', 'bbc']
+        result_container:
+          - has_infobox
 
 categories_as_tabs:
-  general:
-  images:
-  videos:
-  news:
-  map:
-  music:
-  it:
-  science:
-  files:
-  social media:
+  general: []
+  images: []
+  videos: []
+  news: []
+  map: []
+  music: []
+  it: []
+  science: []
+  files: []
+  social media: []
 
-# 仅保留SearXNG官方内置且国内可访问的引擎
 engines:
-  - name: baidu
-    engine: baidu
-    shortcut: bd
-    disabled: false
-    categories: [general, web]
-    timeout: 10.0
+  - name: 9gag
+    engine: 9gag
+    shortcut: 9g
+    disabled: true
 
-  - name: bing
-    engine: bing
-    shortcut: bi
-    disabled: false
-    categories: [general, web]
-    timeout: 10.0
-    max_redirects: 2  # 解决必应重定向报错
-    base_url: 'https://cn.bing.com'  # 必应国内版
+  - name: adobe stock
+    engine: adobe_stock
+    shortcut: asi
+    categories: ['images']
+    adobe_order: relevance
+    adobe_content_types: ['photo', 'illustration', 'zip_vector', 'template', '3d', 'image']
+    timeout: 6
+    disabled: true
 
-  - name: bing_images
-    engine: bing_images
-    shortcut: bii
-    categories: [images]
-    disabled: false
-    timeout: 10.0
-    base_url: 'https://cn.bing.com'
+  - name: adobe stock video
+    engine: adobe_stock
+    shortcut: asv
+    network: adobe stock
+    categories: ['videos']
+    adobe_order: relevance
+    adobe_content_types: ['video']
+    timeout: 6
+    disabled: true
 
-  - name: bing_news
-    engine: bing_news
-    shortcut: bin
-    categories: [news]
-    disabled: false
-    timeout: 10.0
-    base_url: 'https://cn.bing.com'
+  - name: adobe stock audio
+    engine: adobe_stock
+    shortcut: asa
+    network: adobe stock
+    categories: ['music']
+    adobe_order: relevance
+    adobe_content_types: ['audio']
+    timeout: 6
+    disabled: true
 
-  - name: bing_videos
-    engine: bing_videos
-    shortcut: biv
-    categories: [videos]
-    disabled: false
-    timeout: 10.0
-    base_url: 'https://cn.bing.com'
+  - name: alexandria
+    engine: json_engine
+    shortcut: alx
+    categories: general
+    paging: true
+    search_url: https://api.alexandria.org/?a=1&q={query}&p={pageno}
+    results_query: results
+    title_query: title
+    url_query: url
+    content_query: snippet
+    timeout: 1.5
+    disabled: true
+    about:
+      website: https://alexandria.org/
+      official_api_documentation: https://github.com/alexandria-org/alexandria-api/raw/master/README.md
+      use_official_api: true
+      require_api_key: false
+      results: JSON
 
-  - name: bilibili
-    engine: bilibili
-    shortcut: bil
+  - name: alpine linux packages
+    engine: alpinelinux
+    disabled: true
+    shortcut: alp
+
+  - name: annas archive
+    engine: annas_archive
+    disabled: true
+    shortcut: aa
+
+  - name: apk mirror
+    engine: apkmirror
+    timeout: 4.0
+    shortcut: apkm
+    disabled: true
+
+  - name: apple app store
+    engine: apple_app_store
+    shortcut: aps
+    disabled: true
+
+  - name: ahmia
+    engine: ahmia
+    categories: onions
+    enable_http: true
+    shortcut: ah
+
+  - name: anaconda
+    engine: xpath
+    paging: true
+    first_page_num: 0
+    search_url: https://anaconda.org/search?q={query}&page={pageno}
+    results_xpath: //tbody/tr
+    url_xpath: ./td/h5/a[last()]/@href
+    title_xpath: ./td/h5
+    content_xpath: ./td[h5]/text()
+    categories: it
+    timeout: 6.0
+    shortcut: conda
     disabled: false
-    categories: [videos, music]
-    timeout: 10.0
+
+  - name: arch linux wiki
+    engine: archlinux
+    shortcut: al
+
+  - name: nixos wiki
+    engine: mediawiki
+    shortcut: nixw
+    base_url: https://wiki.nixos.org/
+    search_type: text
+    disabled: false
+    categories: [it, software wikis]
+
+  - name: artic
+    engine: artic
+    shortcut: arc
+    timeout: 4.0
+
+  - name: arxiv
+    engine: arxiv
+    shortcut: arx
+    timeout: 4.0
+
+  - name: ask
+    engine: ask
+    shortcut: ask
+    disabled: true
+
+  - name: bandcamp
+    engine: bandcamp
+    shortcut: bc
+    categories: music
 
   - name: wikipedia
     engine: wikipedia
     shortcut: wp
     display_type: ['infobox']
     categories: [general]
-    timeout: 10.0
-    base_url: 'https://zh.wikipedia.org'  # 维基百科中文站
 
-  - name: github
-    engine: github
-    shortcut: gh
+  - name: bilibili
+    engine: bilibili
+    shortcut: bil
     disabled: false
+
+  - name: bing
+    engine: bing
+    shortcut: bi
+    disabled: false
+    max_redirects: 1
+
+  - name: bing images
+    engine: bing_images
+    shortcut: bii
+
+  - name: bing news
+    engine: bing_news
+    shortcut: bin
+
+  - name: bing videos
+    engine: bing_videos
+    shortcut: biv
+
+  - name: bitbucket
+    engine: xpath
+    paging: true
+    search_url: https://bitbucket.org/repo/all/{pageno}?name={query}
+    url_xpath: //article[@class="repo-summary"]//a[@class="repo-link"]/@href
+    title_xpath: //article[@class="repo-summary"]//a[@class="repo-link"]
+    content_xpath: //article[@class="repo-summary"]/p
     categories: [it, repos]
-    timeout: 15.0  # GitHub延长超时
+    timeout: 4.0
+    disabled: true
+    shortcut: bb
+    about:
+      website: https://bitbucket.org/
+      wikidata_id: Q2493781
+      official_api_documentation: https://developer.atlassian.com/bitbucket
+      use_official_api: false
+      require_api_key: false
+      results: HTML
+
+  - name: bpb
+    engine: bpb
+    shortcut: bpb
+    disabled: true
+
+  - name: btdigg
+    engine: btdigg
+    shortcut: bt
+    disabled: true
+
+  - name: openverse
+    engine: openverse
+    categories: images
+    shortcut: opv
+
+  - name: media.ccc.de
+    engine: ccc_media
+    shortcut: c3tv
+    disabled: true
+
+  - name: chefkoch
+    engine: chefkoch
+    shortcut: chef
+
+  - name: cloudflareai
+    engine: cloudflareai
+    shortcut: cfai
+    cf_account_id: 'your_cf_accout_id'
+    cf_ai_api: 'your_cf_api'
+    cf_ai_gateway: 'your_cf_ai_gateway_name'
+    cf_ai_model: 'ai_model_name'
+    timeout: 30
+    disabled: true
+
+  - name: cppreference
+    engine: cppreference
+    shortcut: cpp
+    paging: false
+    disabled: true
+
+  - name: crossref
+    engine: crossref
+    shortcut: cr
+    timeout: 30
+    disabled: true
+
+  - name: crowdview
+    engine: json_engine
+    shortcut: cv
+    categories: general
+    paging: false
+    search_url: https://crowdview-next-js.onrender.com/api/search-v3?query={query}
+    results_query: results
+    url_query: link
+    title_query: title
+    content_query: snippet
+    title_html_to_text: true
+    content_html_to_text: true
+    disabled: true
+    about:
+      website: https://crowdview.ai/
+
+  - name: yep
+    engine: yep
+    shortcut: yep
+    categories: general
+    search_type: web
+    timeout: 5
+    disabled: true
+
+  - name: yep images
+    engine: yep
+    shortcut: yepi
+    categories: images
+    search_type: images
+    disabled: true
+
+  - name: yep news
+    engine: yep
+    shortcut: yepn
+    categories: news
+    search_type: news
+    disabled: true
+
+  - name: curlie
+    engine: xpath
+    shortcut: cl
+    categories: general
+    disabled: true
+    paging: true
+    lang_all: ''
+    search_url: https://curlie.org/search?q={query}&lang={lang}&start={pageno}&stime=92452189
+    page_size: 20
+    results_xpath: //div[@id="site-list-content"]/div[@class="site-item"]
+    url_xpath: ./div[@class="title-and-desc"]/a/@href
+    title_xpath: ./div[@class="title-and-desc"]/a/div
+    content_xpath: ./div[@class="title-and-desc"]/div[@class="site-descr"]
+    about:
+      website: https://curlie.org/
+      wikidata_id: Q60715723
+      use_official_api: false
+      require_api_key: false
+      results: HTML
+
+  - name: currency
+    engine: currency_convert
+    categories: general
+    shortcut: cc
+
+  - name: deezer
+    engine: deezer
+    shortcut: dz
+    disabled: true
+
+  - name: destatis
+    engine: destatis
+    shortcut: destat
+    disabled: true
+
+  - name: deviantart
+    engine: deviantart
+    shortcut: da
+    timeout: 3.0
+
+  - name: ddg definitions
+    engine: duckduckgo_definitions
+    shortcut: ddd
+    weight: 2
+    disabled: true
+    tests: *tests_infobox
+
+  - name: docker hub
+    engine: docker_hub
+    shortcut: dh
+    categories: [it, packages]
+    disabled: true
+
+  - name: encyclosearch
+    engine: json_engine
+    shortcut: es
+    categories: general
+    paging: true
+    search_url: https://encyclosearch.org/encyclosphere/search?q={query}&page={pageno}&resultsPerPage=15
+    results_query: Results
+    url_query: SourceURL
+    title_query: Title
+    content_query: Description
+    disabled: false
+    about:
+      website: https://encyclosearch.org
+      official_api_documentation: https://encyclosearch.org/docs/#/rest-api
+      use_official_api: true
+      require_api_key: false
+      results: JSON
+
+  - name: erowid
+    engine: xpath
+    paging: true
+    first_page_num: 0
+    page_size: 30
+    search_url: https://www.erowid.org/search.php?q={query}&s={pageno}
+    url_xpath: //dl[@class="results-list"]/dt[@class="result-title"]/a/@href
+    title_xpath: //dl[@class="results-list"]/dt[@class="result-title"]/a/text()
+    content_xpath: //dl[@class="results-list"]/dd[@class="result-details"]
+    categories: []
+    shortcut: ew
+    disabled: true
+    about:
+      website: https://www.erowid.org/
+      wikidata_id: Q1430691
+      use_official_api: false
+      require_api_key: false
+      results: HTML
+
+  - name: wikidata
+    engine: wikidata
+    shortcut: wd
+    timeout: 3.0
+    weight: 2
+    display_type: ['infobox']
+    tests: *tests_infobox
+    categories: [general]
+
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+    disabled: true
+
+  - name: duckduckgo images
+    engine: duckduckgo_extra
+    categories: [images, web]
+    ddg_category: images
+    shortcut: ddi
+    disabled: true
+
+  - name: duckduckgo videos
+    engine: duckduckgo_extra
+    categories: [videos, web]
+    ddg_category: videos
+    shortcut: ddv
+    disabled: true
+
+  - name: duckduckgo news
+    engine: duckduckgo_extra
+    categories: [news, web]
+    ddg_category: news
+    shortcut: ddn
+    disabled: true
+
+  - name: duckduckgo weather
+    engine: duckduckgo_weather
+    shortcut: ddw
+    disabled: true
+
+  - name: apple maps
+    engine: apple_maps
+    shortcut: apm
+    disabled: true
+    timeout: 5.0
+
+  - name: emojipedia
+    engine: emojipedia
+    timeout: 4.0
+    shortcut: em
+    disabled: true
+
+  - name: tineye
+    engine: tineye
+    shortcut: tin
+    timeout: 9.0
+    disabled: true
+
+  - name: etymonline
+    engine: xpath
+    paging: true
+    search_url: https://etymonline.com/search?page={pageno}&q={query}
+    url_xpath: //a[contains(@class, "word__name--")]/@href
+    title_xpath: //a[contains(@class, "word__name--")]
+    content_xpath: //section[contains(@class, "word__defination")]
+    first_page_num: 1
+    shortcut: et
+    categories: [dictionaries]
+    about:
+      website: https://www.etymonline.com/
+      wikidata_id: Q1188617
+      use_official_api: false
+      require_api_key: false
+      results: HTML
+
+  - name: 1x
+    engine: www1x
+    shortcut: 1x
+    timeout: 3.0
+    disabled: true
+
+  - name: fdroid
+    engine: fdroid
+    shortcut: fd
+    disabled: true
+
+  - name: findthatmeme
+    engine: findthatmeme
+    shortcut: ftm
+    disabled: true
+
+  - name: flickr
+    categories: images
+    shortcut: fl
+    engine: flickr_noapi
+    disabled: true
+
+  - name: free software directory
+    engine: mediawiki
+    shortcut: fsd
+    categories: [it, software wikis]
+    base_url: https://directory.fsf.org/
+    search_type: title
+    timeout: 5.0
+    disabled: true
+    about:
+      website: https://directory.fsf.org/
+      wikidata_id: Q2470288
+
+  - name: frinkiac
+    engine: frinkiac
+    shortcut: frk
+    disabled: true
+
+  - name: fyyd
+    engine: fyyd
+    shortcut: fy
+    timeout: 8.0
+    disabled: true
+
+  - name: geizhals
+    engine: geizhals
+    shortcut: geiz
+    disabled: true
+
+  - name: genius
+    engine: genius
+    shortcut: gen
+    disabled: true
+
+  - name: gentoo
+    engine: mediawiki
+    shortcut: ge
+    categories: ['it', 'software wikis']
+    base_url: 'https://wiki.gentoo.org/'
+    api_path: 'api.php'
+    search_type: text
+    timeout: 10
 
   - name: gitlab
     engine: gitlab
     base_url: https://gitlab.com
     shortcut: gl
     disabled: false
-    categories: [it, repos]
-    timeout: 10.0
+    about:
+      website: https://gitlab.com/
+      wikidata_id: Q16639197
+
+  - name: github
+    engine: github
+    shortcut: gh
 
   - name: codeberg
     engine: gitea
     base_url: https://codeberg.org
     shortcut: cb
     disabled: false
-    categories: [it, repos]
-    timeout: 10.0
 
-  - name: archlinux
-    engine: archlinux
-    shortcut: al
-    disabled: false
-    categories: [it]
-    timeout: 10.0
+  - name: gitea.com
+    engine: gitea
+    base_url: https://gitea.com
+    shortcut: gitea
+    disabled: true
 
-  - name: currency_convert
-    engine: currency_convert
-    categories: general
-    shortcut: cc
-    disabled: false
+  - name: goodreads
+    engine: goodreads
+    shortcut: good
+    timeout: 4.0
+    disabled: true
 
-  - name: open_meteo
-    engine: open_meteo
-    shortcut: om
-    disabled: false
-    categories: [general]
-    timeout: 10.0
-    base_url: 'https://api.open-meteo.com'
+  - name: google
+    engine: google
+    shortcut: go
+    disabled: true
 
-  - name: openstreetmap
-    engine: openstreetmap
-    shortcut: osm
-    disabled: false
-    categories: [map]
-    timeout: 10.0
+  - name: google images
+    engine: google_images
+    shortcut: goi
+    disabled: true
+
+  - name: google news
+    engine: google_news
+    shortcut: gon
+    disabled: true
+
+  - name: google videos
+    engine: google_videos
+    shortcut: gov
+    disabled: true
+
+  - name: google scholar
+    engine: google_scholar
+    shortcut: gos
+
+  - name: google play apps
+    engine: google_play
+    categories: [files, apps]
+    shortcut: gpa
+    play_categ: apps
+    disabled: true
+
+  - name: google play movies
+    engine: google_play
+    categories: videos
+    shortcut: gpm
+    play_categ: movies
+    disabled: true
+
+  - name: material icons
+    engine: material_icons
+    categories: images
+    shortcut: mi
+    disabled: true
+
+  - name: habrahabr
+    engine: xpath
+    paging: true
+    search_url: https://habr.com/en/search/page{pageno}/?q={query}
+    results_xpath: //article[contains(@class, "tm-articles-list__item")]
+    url_xpath: .//a[@class="tm-title__link"]/@href
+    title_xpath: .//a[@class="tm-title__link"]
+    content_xpath: .//div[contains(@class, "article-formatted-body")]
+    categories: it
+    timeout: 4.0
+    disabled: true
+    shortcut: habr
+    about:
+      website: https://habr.com/
+      wikidata_id: Q4494434
+      official_api_documentation: https://habr.com/en/docs/help/api/
+      use_official_api: false
+      require_api_key: false
+      results: HTML
+
+  - name: hackernews
+    engine: hackernews
+    shortcut: hn
+    disabled: true
+
+  - name: hex
+    engine: hex
+    shortcut: hex
+    disabled: true
+    sort_criteria: 'recent_downloads'
+    page_size: 10
+
+  - name: crates.io
+    engine: crates
+    shortcut: crates
+    disabled: true
+    timeout: 6.0
+
+  - name: hoogle
+    engine: xpath
+    search_url: https://hoogle.haskell.org/?hoogle={query}
+    results_xpath: '//div[@class="result"]'
+    title_xpath: './/div[@class="ans"]//a'
+    url_xpath: './/div[@class="ans"]//a/@href'
+    content_xpath: './/div[@class="from"]'
+    page_size: 20
+    categories: [it, packages]
+    shortcut: ho
+    about:
+      website: https://hoogle.haskell.org/
+      wikidata_id: Q34010
+      official_api_documentation: https://hackage.haskell.org/api
+      use_official_api: false
+      require_api_key: false
+      results: JSON
+
+  - name: imdb
+    engine: imdb
+    shortcut: imdb
+    timeout: 6.0
+    disabled: true
+
+  - name: imgur
+    engine: imgur
+    shortcut: img
+    disabled: true
+
+  - name: ina
+    engine: ina
+    shortcut: in
+    timeout: 6.0
+    disabled: true
+
+  - name: invidious
+    engine: invidious
+    base_url:
+      - https://invidious.adminforge.de
+      - https://inv.nadeko.net
+    shortcut: iv
+    timeout: 3.0
+    disabled: true
+
+  - name: ipernity
+    engine: ipernity
+    shortcut: ip
+    disabled: true
+
+  - name: jisho
+    engine: jisho
+    shortcut: js
+    timeout: 3.0
+    disabled: true
+
+  - name: kickass
+    engine: kickass
+    base_url:
+      - https://kickasstorrents.to
+      - https://kickasstorrents.cr
+      - https://kickasstorrent.cr
+      - https://kickass.sx
+      - https://kat.am
+    shortcut: kc
+    timeout: 4.0
+    disabled: true
+
+  - name: lemmy communities
+    engine: lemmy
+    lemmy_type: Communities
+    shortcut: leco
+    disabled: true
+
+  - name: lemmy users
+    engine: lemmy
+    network: lemmy communities
+    lemmy_type: Users
+    shortcut: leus
+    disabled: true
+
+  - name: lemmy posts
+    engine: lemmy
+    network: lemmy communities
+    lemmy_type: Posts
+    shortcut: lepo
+    disabled: true
+
+  - name: lemmy comments
+    engine: lemmy
+    network: lemmy communities
+    lemmy_type: Comments
+    shortcut: lecom
+    disabled: true
+
+  - name: library genesis
+    engine: xpath
+    search_url: https://libgen.rs/search.php?req={query}
+    url_xpath: //a[contains(@href,"book/index.php?md5")]/@href
+    title_xpath: //a[contains(@href,"book/")]/text()[1]
+    content_xpath: //td/a[1][contains(@href,"=author")]/text()
+    categories: files
+    timeout: 7.0
+    disabled: true
+    shortcut: lg
+    about:
+      website: https://libgen.fun/
+      wikidata_id: Q22017206
+      use_official_api: false
+      require_api_key: false
+      results: HTML
+
+  - name: z-library
+    engine: zlibrary
+    shortcut: zlib
+    categories: files
+    timeout: 7.0
+    disabled: true
+
+  - name: library of congress
+    engine: loc
+    shortcut: loc
+    categories: images
+
+  - name: libretranslate
+    engine: libretranslate
+    base_url:
+      - https://libretranslate.com/translate
+    shortcut: lt
+    disabled: true
+
+  - name: lingva
+    engine: lingva
+    shortcut: lv
+
+  - name: lobste.rs
+    engine: xpath
+    search_url: https://lobste.rs/search?q={query}&what=stories&order=relevance
+    results_xpath: //li[contains(@class, "story")]
+    url_xpath: .//a[@class="u-url"]/@href
+    title_xpath: .//a[@class="u-url"]
+    content_xpath: .//a[@class="domain"]
+    categories: it
+    shortcut: lo
+    timeout: 5.0
+    disabled: true
+    about:
+      website: https://lobste.rs/
+      wikidata_id: Q60762874
+      use_official_api: false
+      require_api_key: false
+      results: HTML
+
+  - name: mastodon users
+    engine: mastodon
+    mastodon_type: accounts
+    base_url: https://mastodon.social
+    shortcut: mau
+
+  - name: mastodon hashtags
+    engine: mastodon
+    mastodon_type: hashtags
+    base_url: https://mastodon.social
+    shortcut: mah
 
   - name: mdn
     shortcut: mdn
@@ -232,58 +908,136 @@ engines:
     url_prefix: https://developer.mozilla.org
     title_query: title
     content_query: summary
-    timeout: 10.0
+    about:
+      website: https://developer.mozilla.org
+      wikidata_id: Q3273508
+      use_official_api: false
+      require_api_key: false
+      results: JSON
 
-  - name: npm
-    engine: npm
-    shortcut: npm
-    categories: [it, packages]
-    timeout: 10.0
-    disabled: false
-
-  - name: docker_hub
-    engine: docker_hub
-    shortcut: dh
-    categories: [it, packages]
-    timeout: 10.0
-    disabled: false
-
-  - name: anaconda
-    engine: xpath
-    paging: true
-    first_page_num: 0
-    search_url: https://anaconda.org/search?q={query}&page={pageno}
-    results_xpath: //tbody/tr
-    url_xpath: ./td/h5/a[last()]/@href
-    title_xpath: ./td/h5
-    content_xpath: ./td[h5]/text()
-    categories: [it, packages]
-    timeout: 10.0
-    disabled: false
-
-  - name: lingva
-    engine: lingva
-    shortcut: lv
-    categories: [general]
-    timeout: 10.0
-    disabled: false  # 翻译引擎
+  - name: metacpan
+    engine: metacpan
+    shortcut: cpan
+    disabled: true
+    number_of_results: 20
 
   - name: mixcloud
     engine: mixcloud
     shortcut: mc
-    categories: [music]
-    timeout: 10.0
-    disabled: false
 
-  - name: encyclosearch
+  - name: mozhi
+    engine: mozhi
+    base_url:
+      - https://mozhi.aryak.me
+      - https://translate.bus-hit.me
+      - https://nyc1.mz.ggtyler.dev
+    timeout: 4.0
+    shortcut: mz
+    disabled: true
+
+  - name: mwmbl
+    engine: mwmbl
+    shortcut: mwm
+    disabled: true
+
+  - name: npm
+    engine: npm
+    shortcut: npm
+    timeout: 5.0
+    disabled: true
+
+  - name: nyaa
+    engine: nyaa
+    shortcut: nt
+    disabled: true
+
+  - name: mankier
     engine: json_engine
-    shortcut: es
-    categories: [general]
+    search_url: https://www.mankier.com/api/v2/mans/?q={query}
+    results_query: results
+    url_query: url
+    title_query: name
+    content_query: description
+    categories: it
+    shortcut: man
+    about:
+      website: https://www.mankier.com/
+      official_api_documentation: https://www.mankier.com/api
+      use_official_api: true
+      require_api_key: false
+      results: JSON
+
+  - name: odysee
+    engine: odysee
+    shortcut: od
+    disabled: true
+
+  - name: openairedatasets
+    engine: json_engine
     paging: true
-    search_url: https://encyclosearch.org/encyclosphere/search?q={query}&page={pageno}&resultsPerPage=15
-    results_query: Results
-    url_query: SourceURL
-    title_query: Title
-    content_query: Description
-    disabled: false
-    timeout: 10.0
+    search_url: https://api.openaire.eu/search/datasets?format=json&page={pageno}&size=10&title={query}
+    results_query: response/results/result
+    url_query: metadata/oaf:entity/oaf:result/children/instance/webresource/url/$
+    title_query: metadata/oaf:entity/oaf:result/title/$
+    content_query: metadata/oaf:entity/oaf:result/description/$
+    content_html_to_text: true
+    categories: 'science'
+    shortcut: oad
+    timeout: 5.0
+    about:
+      website: https://www.openaire.eu/
+      wikidata_id: Q25106053
+      official_api_documentation: https://api.openaire.eu/
+      use_official_api: false
+      require_api_key: false
+      results: JSON
+
+  - name: openairepublications
+    engine: json_engine
+    paging: true
+    search_url: https://api.openaire.eu/search/publications?format=json&page={pageno}&size=10&title={query}
+    results_query: response/results/result
+    url_query: metadata/oaf:entity/oaf:result/children/instance/webresource/url/$
+    title_query: metadata/oaf:entity/oaf:result/title/$
+    content_query: metadata/oaf:entity/oaf:result/description/$
+    content_html_to_text: true
+    categories: science
+    shortcut: oap
+    timeout: 5.0
+    about:
+      website: https://www.openaire.eu/
+      wikidata_id: Q25106053
+      official_api_documentation: https://api.openaire.eu/
+      use_official_api: false
+      require_api_key: false
+      results: JSON
+
+  - name: openlibrary
+    engine: openlibrary
+    shortcut: ol
+    timeout: 5
+    disabled: true
+
+  - name: openmeteo
+    engine: open_meteo
+    shortcut: om
+    disabled: true
+
+  - name: openstreetmap
+    engine: openstreetmap
+    shortcut: osm
+
+  - name: openrepos
+    engine: xpath
+    paging: true
+    search_url: https://openrepos.net/search/node/{query}?page={pageno}
+    url_xpath: //li[@class="search-result"]//h3[@class="title"]/a/@href
+    title_xpath: //li[@class="search-result"]//h3[@class="title"]/a
+    content_xpath: //li[@class="search-result"]//div[@class="search-snippet-info"]//p[@class="search-snippet"]
+    categories: files
+    timeout: 4.0
+    disabled: true
+    shortcut: or
+    about:
+      website: https://openrepos.net/
+      wikidata_id: ''
