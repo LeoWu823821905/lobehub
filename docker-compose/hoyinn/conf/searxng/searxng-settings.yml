@@ -447,7 +447,7 @@ engines:
     categories: it
     timeout: 6.0
     shortcut: conda
-    disabled: true
+    disabled: false
 
   - name: arch linux wiki
     engine: archlinux
@@ -458,7 +458,7 @@ engines:
     shortcut: nixw
     base_url: https://wiki.nixos.org/
     search_type: text
-    disabled: true
+    disabled: false
     categories: [it, software wikis]
 
   - name: artic
@@ -496,12 +496,15 @@ engines:
   - name: bilibili
     engine: bilibili
     shortcut: bil
-    disabled: true
+    disabled: false
 
   - name: bing
     engine: bing
     shortcut: bi
-    disabled: true
+    disabled: false
+    max_redirects: 1
+    language: zh-CN
+    region: cn
 
   - name: bing images
     engine: bing_images
@@ -695,6 +698,7 @@ engines:
     engine: docker_hub
     shortcut: dh
     categories: [it, packages]
+    disabled: true
 
   - name: encyclosearch
     engine: json_engine
@@ -706,7 +710,7 @@ engines:
     url_query: SourceURL
     title_query: Title
     content_query: Description
-    disabled: true
+    disabled: false
     about:
       website: https://encyclosearch.org
       official_api_documentation: https://encyclosearch.org/docs/#/rest-api
@@ -761,6 +765,7 @@ engines:
   - name: duckduckgo
     engine: duckduckgo
     shortcut: ddg
+    disabled: true
 
   - name: duckduckgo images
     engine: duckduckgo_extra
@@ -856,6 +861,7 @@ engines:
     # api_key: 'apikey' # required!
     # Or you can use the html non-stable engine, activated by default
     engine: flickr_noapi
+    disabled: true
 
   - name: free software directory
     engine: mediawiki
@@ -896,6 +902,7 @@ engines:
   - name: genius
     engine: genius
     shortcut: gen
+    disabled: true
 
   - name: gentoo
     engine: mediawiki
@@ -910,7 +917,7 @@ engines:
     engine: gitlab
     base_url: https://gitlab.com
     shortcut: gl
-    disabled: true
+    disabled: false
     about:
       website: https://gitlab.com/
       wikidata_id: Q16639197
@@ -932,7 +939,7 @@ engines:
     engine: gitea
     base_url: https://codeberg.org
     shortcut: cb
-    disabled: true
+    disabled: false
 
   - name: gitea.com
     engine: gitea
@@ -949,12 +956,14 @@ engines:
   - name: google
     engine: google
     shortcut: go
+    disabled: true
     # additional_tests:
     #   android: *test_android
 
   - name: google images
     engine: google_images
     shortcut: goi
+    disabled: true
     # additional_tests:
     #   android: *test_android
     #   dali:
@@ -967,12 +976,14 @@ engines:
   - name: google news
     engine: google_news
     shortcut: gon
+    disabled: true
     # additional_tests:
     #   android: *test_android
 
   - name: google videos
     engine: google_videos
     shortcut: gov
+    disabled: true
     # additional_tests:
     #   android: *test_android
 
@@ -1106,29 +1117,34 @@ engines:
       - https://kat.am
     shortcut: kc
     timeout: 4.0
+    disabled: true
 
   - name: lemmy communities
     engine: lemmy
     lemmy_type: Communities
     shortcut: leco
+    disabled: true
 
   - name: lemmy users
     engine: lemmy
     network: lemmy communities
     lemmy_type: Users
     shortcut: leus
+    disabled: true
 
   - name: lemmy posts
     engine: lemmy
     network: lemmy communities
     lemmy_type: Posts
     shortcut: lepo
+    disabled: true
 
   - name: lemmy comments
     engine: lemmy
     network: lemmy communities
     lemmy_type: Comments
     shortcut: lecom
+    disabled: true
 
   - name: library genesis
     engine: xpath
@@ -1154,6 +1170,7 @@ engines:
     shortcut: zlib
     categories: files
     timeout: 7.0
+    disabled: true
 
   - name: library of congress
     engine: loc
