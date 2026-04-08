@@ -5,6 +5,7 @@ general:
   donation_url: false
   contact_url: false
   enable_metrics: true
+  default_doi_resolver: 'https://doi.org/'
   open_metrics: ''
 
 brand:
@@ -39,6 +40,7 @@ server:
   base_url: /
   limiter: false
   public_instance: false
+  trust_x_forwarded_for: true
   secret_key: '779c5b69fe650f147be9012abca6b44a8697acdb2817b46353f4779bb07d81d1'
   image_proxy: false
   http_protocol_version: '1.0'
