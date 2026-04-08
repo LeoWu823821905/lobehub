@@ -16,7 +16,7 @@ brand:
 
 search:
   safe_search: 0
-  autocomplete: 'baidu'
+  autocomplete: 'baidu'  # 仅保留官方支持的百度自动补全
   autocomplete_min: 2
   favicon_resolver: 'duckduckgo'
   default_lang: 'zh-CN'
@@ -35,11 +35,11 @@ search:
 
 server:
   port: 8888
-  bind_address: '0.0.0.0'  # 允许外部访问
+  bind_address: '0.0.0.0'
   base_url: /
   limiter: false
   public_instance: false
-  secret_key: '请替换为随机生成的32位以上字符串'  # 建议用: openssl rand -hex 32
+  secret_key: '779c5b69fe650f147be9012abca6b44a8697acdb2817b46353f4779bb07d81d1'  # 可保留你的密钥
   image_proxy: false
   http_protocol_version: '1.1'
   method: 'POST'
@@ -48,8 +48,8 @@ server:
     X-Download-Options: noopen
     X-Robots-Tag: noindex, nofollow
     Referrer-Policy: no-referrer
-    X-Forwarded-For: 127.0.0.1  # 解决X-Forwarded-For缺失问题
-    X-Real-IP: 127.0.0.1        # 解决X-Real-IP缺失问题
+    X-Forwarded-For: 127.0.0.1  # 解决X-Forwarded-For缺失
+    X-Real-IP: 127.0.0.1        # 解决X-Real-IP缺失
 
 redis:
   url: false
@@ -70,16 +70,16 @@ ui:
   url_formatting: pretty
 
 outgoing:
-  request_timeout: 10.0  # 延长超时时间适配国内网络
+  request_timeout: 10.0  # 延长超时适配国内网络
   max_request_timeout: 15.0
   useragent_suffix: ''
   pool_connections: 100
   pool_maxsize: 20
-  enable_http2: false  # 禁用HTTP2减少兼容性问题
-  # 如需代理请取消注释并配置
+  enable_http2: false  # 禁用HTTP2解决兼容性问题
+  # 如需代理访问GitHub等，取消以下注释并配置
   # proxies:
   #   all://:
-  #     - http://127.0.0.1:7890  # 替换为你的代理地址
+  #     - http://127.0.0.1:7890
   using_tor_proxy: false
   extra_proxy_timeout: 5
 
@@ -113,40 +113,25 @@ categories_as_tabs:
   files:
   social media:
 
+# 仅保留SearXNG官方内置且国内可访问的引擎
 engines:
-  # 仅保留国内可访问且稳定的引擎
-  - name: 百度
+  - name: baidu
     engine: baidu
     shortcut: bd
     disabled: false
     categories: [general, web]
     timeout: 10.0
-    max_redirects: 2
 
-  - name: 百度图片
-    engine: baidu_images
-    shortcut: bdi
-    categories: [images]
-    disabled: false
-    timeout: 10.0
-
-  - name: 百度新闻
-    engine: baidu_news
-    shortcut: bdn
-    categories: [news]
-    disabled: false
-    timeout: 10.0
-
-  - name: 必应中国
+  - name: bing
     engine: bing
     shortcut: bi
     disabled: false
     categories: [general, web]
     timeout: 10.0
-    max_redirects: 2
-    base_url: 'https://cn.bing.com'
+    max_redirects: 2  # 解决必应重定向报错
+    base_url: 'https://cn.bing.com'  # 必应国内版
 
-  - name: 必应图片中国
+  - name: bing_images
     engine: bing_images
     shortcut: bii
     categories: [images]
@@ -154,7 +139,7 @@ engines:
     timeout: 10.0
     base_url: 'https://cn.bing.com'
 
-  - name: 必应新闻中国
+  - name: bing_news
     engine: bing_news
     shortcut: bin
     categories: [news]
@@ -162,113 +147,143 @@ engines:
     timeout: 10.0
     base_url: 'https://cn.bing.com'
 
-  - name: 哔哩哔哩
+  - name: bing_videos
+    engine: bing_videos
+    shortcut: biv
+    categories: [videos]
+    disabled: false
+    timeout: 10.0
+    base_url: 'https://cn.bing.com'
+
+  - name: bilibili
     engine: bilibili
     shortcut: bil
     disabled: false
     categories: [videos, music]
     timeout: 10.0
 
-  - name: 知乎
-    engine: zhihu
-    shortcut: zh
-    disabled: false
-    categories: [general, social media]
-    timeout: 10.0
-
-  - name: 豆瓣
-    engine: douban
-    shortcut: db
-    disabled: false
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: wp
+    display_type: ['infobox']
     categories: [general]
     timeout: 10.0
+    base_url: 'https://zh.wikipedia.org'  # 维基百科中文站
 
-  - name: 开源中国
-    engine: oschina
-    shortcut: osc
+  - name: github
+    engine: github
+    shortcut: gh
+    disabled: false
+    categories: [it, repos]
+    timeout: 15.0  # GitHub延长超时
+
+  - name: gitlab
+    engine: gitlab
+    base_url: https://gitlab.com
+    shortcut: gl
+    disabled: false
+    categories: [it, repos]
+    timeout: 10.0
+
+  - name: codeberg
+    engine: gitea
+    base_url: https://codeberg.org
+    shortcut: cb
+    disabled: false
+    categories: [it, repos]
+    timeout: 10.0
+
+  - name: archlinux
+    engine: archlinux
+    shortcut: al
     disabled: false
     categories: [it]
     timeout: 10.0
 
-  - name: 掘金
-    engine: juejin
-    shortcut: jj
-    disabled: false
-    categories: [it]
-    timeout: 10.0
-
-  - name: 阿里云镜像
-    engine: aliyun
-    shortcut: aliyun
-    disabled: false
-    categories: [it, packages]
-    timeout: 10.0
-
-  - name: 腾讯云开发者
-    engine: cloud_tencent
-    shortcut: tencent
-    disabled: false
-    categories: [it]
-    timeout: 10.0
-
-  - name: 天气
-    engine: open_meteo
-    shortcut: om
-    disabled: false
-    timeout: 10.0
-    base_url: 'https://api.open-meteo.com'
-
-  - name: 货币转换
+  - name: currency_convert
     engine: currency_convert
     categories: general
     shortcut: cc
     disabled: false
 
-  - name: Arch Linux 中文维基
-    engine: archlinux
-    shortcut: al
-    disabled: false
-    timeout: 10.0
-
-  - name: GitHub
-    engine: github
-    shortcut: gh
-    disabled: false
-    categories: [it, repos]
-    timeout: 15.0  # GitHub适当延长超时
-
-  - name: Gitee
-    engine: gitee
-    shortcut: gitee
-    disabled: false
-    categories: [it, repos]
-    timeout: 10.0
-
-  - name: 有道翻译
-    engine: youdao
-    shortcut: youdao
+  - name: open_meteo
+    engine: open_meteo
+    shortcut: om
     disabled: false
     categories: [general]
     timeout: 10.0
+    base_url: 'https://api.open-meteo.com'
 
-  - name: 高德地图
-    engine: amap
-    shortcut: amap
+  - name: openstreetmap
+    engine: openstreetmap
+    shortcut: osm
     disabled: false
     categories: [map]
     timeout: 10.0
-    api_key: '如需使用请替换为你的高德API密钥'
 
-  - name: 搜狗
-    engine: sogou
-    shortcut: sg
-    disabled: false
-    categories: [general]
+  - name: mdn
+    shortcut: mdn
+    engine: json_engine
+    categories: [it]
+    paging: true
+    search_url: https://developer.mozilla.org/api/v1/search?q={query}&page={pageno}
+    results_query: documents
+    url_query: mdn_url
+    url_prefix: https://developer.mozilla.org
+    title_query: title
+    content_query: summary
     timeout: 10.0
 
-  - name: 360搜索
-    engine: so
-    shortcut: so
+  - name: npm
+    engine: npm
+    shortcut: npm
+    categories: [it, packages]
+    timeout: 10.0
     disabled: false
+
+  - name: docker_hub
+    engine: docker_hub
+    shortcut: dh
+    categories: [it, packages]
+    timeout: 10.0
+    disabled: false
+
+  - name: anaconda
+    engine: xpath
+    paging: true
+    first_page_num: 0
+    search_url: https://anaconda.org/search?q={query}&page={pageno}
+    results_xpath: //tbody/tr
+    url_xpath: ./td/h5/a[last()]/@href
+    title_xpath: ./td/h5
+    content_xpath: ./td[h5]/text()
+    categories: [it, packages]
+    timeout: 10.0
+    disabled: false
+
+  - name: lingva
+    engine: lingva
+    shortcut: lv
     categories: [general]
+    timeout: 10.0
+    disabled: false  # 翻译引擎
+
+  - name: mixcloud
+    engine: mixcloud
+    shortcut: mc
+    categories: [music]
+    timeout: 10.0
+    disabled: false
+
+  - name: encyclosearch
+    engine: json_engine
+    shortcut: es
+    categories: [general]
+    paging: true
+    search_url: https://encyclosearch.org/encyclosphere/search?q={query}&page={pageno}&resultsPerPage=15
+    results_query: Results
+    url_query: SourceURL
+    title_query: Title
+    content_query: Description
+    disabled: false
     timeout: 10.0
